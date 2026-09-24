@@ -1,28 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Search, Link as LinkIcon, Loader2, Plus, Globe, Layers, X, ExternalLink, Play, Film } from 'lucide-react';
+import { Search, Link as LinkIcon, Loader2, Plus, Globe, Layers, X, ExternalLink, Play } from 'lucide-react';
 import VideoCard from './VideoCard';
 
 export default function VideoSearchGallery() {
-  // Tab chế độ: 'keyword' (Tìm theo từ khóa) | 'link' (Bóc video từ Link Web)
   const [searchMode, setSearchMode] = useState('keyword');
-
-  // State cho Chế độ Từ khóa
   const [query, setQuery] = useState('');
   const [engine, setEngine] = useState('bing');
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
-
-  // State cho Chế độ Bóc link web
   const [linkInput, setLinkInput] = useState('');
 
-  // State chung
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
 
-  // Modal Player
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [directStreamUrl, setDirectStreamUrl] = useState(null);
   const [extracting, setExtracting] = useState(false);
@@ -39,7 +32,6 @@ export default function VideoSearchGallery() {
     };
   }, [selectedVideo]);
 
-  // Hàm chuyển đổi URL sang Proxy Backend nếu gặp domain chặn Hotlink (Twitter/X)
   const getSafeStreamUrl = (url = '') => {
     if (!url) return '';
     if (url.includes('twimg.com') || url.includes('twitter.com') || url.includes('x.com')) {
@@ -48,7 +40,6 @@ export default function VideoSearchGallery() {
     return url;
   };
 
-  // 1. Tìm kiếm theo từ khóa
   const handleKeywordSearch = async (e) => {
     e?.preventDefault();
     if (!query.trim()) return;
@@ -74,7 +65,6 @@ export default function VideoSearchGallery() {
     }
   };
 
-  // 2. Bóc video từ link web
   const handleExtractFromLink = async (e) => {
     e?.preventDefault();
     if (!linkInput.trim()) return;
@@ -152,7 +142,6 @@ export default function VideoSearchGallery() {
     setSelectedVideo(video);
     setDirectStreamUrl(null);
 
-    // Nếu bản thân item đã có streamUrl bóc sẵn
     if (video.streamUrl) {
       setDirectStreamUrl(video.streamUrl);
       return;
@@ -163,7 +152,6 @@ export default function VideoSearchGallery() {
       return;
     }
 
-    // Bóc tách direct link qua API
     setExtracting(true);
     try {
       const res = await axios.get(
@@ -191,50 +179,51 @@ export default function VideoSearchGallery() {
   };
 
   return (
-    <div className="w-full flex-1 flex flex-col relative items-center">
-      {/* 2 NÚT CHUYỂN CHẾ ĐỘ: TÌM TỪ KHÓA & BÓC TỪ LINK */}
-      <div className="flex bg-slate-900/90 p-1 rounded-2xl border border-slate-800 shadow-md mb-4 w-full max-w-xl">
-        <button
-          type="button"
-          onClick={() => {
-            setSearchMode('keyword');
-            setVideos([]);
-            setHasSearched(false);
-          }}
-          className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-semibold transition-all ${
-            searchMode === 'keyword'
-              ? 'bg-white text-slate-900 shadow-md'
-              : 'text-slate-400 hover:text-white'
-          }`}
-        >
-          <Search size={15} />
-          Tìm theo từ khóa
-        </button>
+    <div className="w-full max-w-full flex-1 flex flex-col relative items-center">
+      {/* 2 nút chuyển chế độ */}
+      <div className="w-full max-w-xl mx-auto mb-3 px-1">
+        <div className="flex bg-slate-900/90 p-1 rounded-xl border border-slate-800">
+          <button
+            type="button"
+            onClick={() => {
+              setSearchMode('keyword');
+              setVideos([]);
+              setHasSearched(false);
+            }}
+            className={`flex-1 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition ${
+              searchMode === 'keyword'
+                ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <Search size={14} />
+            Tìm theo từ khóa
+          </button>
 
-        <button
-          type="button"
-          onClick={() => {
-            setSearchMode('link');
-            setVideos([]);
-            setHasSearched(false);
-          }}
-          className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-semibold transition-all ${
-            searchMode === 'link'
-              ? 'bg-white text-slate-900 shadow-md'
-              : 'text-slate-400 hover:text-white'
-          }`}
-        >
-          <LinkIcon size={15} className="text-blue-600" />
-          Bóc video từ Link Web
-        </button>
+          <button
+            type="button"
+            onClick={() => {
+              setSearchMode('link');
+              setVideos([]);
+              setHasSearched(false);
+            }}
+            className={`flex-1 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition ${
+              searchMode === 'link'
+                ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <LinkIcon size={14} />
+            Bóc video từ Link Web
+          </button>
+        </div>
       </div>
 
-      {/* KHUNG INPUT THỰC THI */}
-      <div className="max-w-xl w-full mb-6">
+      {/* Khung Input */}
+      <div className="w-full max-w-xl mx-auto mb-5 px-1">
         {searchMode === 'keyword' ? (
-          /* Chế độ 1: Tìm theo từ khóa */
           <div>
-            <form onSubmit={handleKeywordSearch} className="flex gap-2">
+            <form onSubmit={handleKeywordSearch} className="flex items-center gap-2 w-full">
               <div className="relative flex-1">
                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                 <input
@@ -247,48 +236,48 @@ export default function VideoSearchGallery() {
                     backgroundColor: '#ffffff',
                     WebkitTextFillColor: '#0f172a',
                   }}
-                  className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                  className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all shadow-sm"
                 />
               </div>
               <button
                 type="submit"
                 disabled={loading}
-                className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition-colors flex items-center gap-2 disabled:opacity-50 shrink-0"
+                className="px-4 sm:px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition flex items-center gap-1.5 shrink-0 disabled:opacity-50 cursor-pointer shadow-md shadow-blue-600/20"
               >
                 {loading ? <Loader2 size={16} className="animate-spin" /> : 'Tìm'}
               </button>
             </form>
 
-            <div className="flex justify-center gap-2 mt-3">
+            {/* Dãy nút nguồn: Hỗ trợ co giãn gọn gàng trên mobile */}
+            <div className="flex items-center justify-center gap-2 mt-3 overflow-x-auto no-scrollbar py-1 w-full">
               <button
                 type="button"
                 onClick={() => handleEngineChange('bing')}
-                className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-colors ${
+                className={`shrink-0 px-3.5 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer border ${
                   engine === 'bing'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-slate-900 text-slate-400 border border-slate-800 hover:bg-slate-800'
+                    ? 'bg-blue-600 text-white border-blue-500 shadow-sm shadow-blue-500/30'
+                    : 'bg-slate-900/80 text-slate-400 border-slate-800 hover:bg-slate-800 hover:text-slate-200'
                 }`}
               >
                 <Globe size={13} />
-                Nguồn 1 (Bing Web)
+                <span>Nguồn 1 <span className="hidden sm:inline">(Bing)</span></span>
               </button>
               <button
                 type="button"
                 onClick={() => handleEngineChange('yandex')}
-                className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-colors ${
+                className={`shrink-0 px-3.5 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer border ${
                   engine === 'yandex'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-slate-900 text-slate-400 border border-slate-800 hover:bg-slate-800'
+                    ? 'bg-blue-600 text-white border-blue-500 shadow-sm shadow-blue-500/30'
+                    : 'bg-slate-900/80 text-slate-400 border-slate-800 hover:bg-slate-800 hover:text-slate-200'
                 }`}
               >
                 <Layers size={13} />
-                Nguồn 2 (DuckDuckGo Web)
+                <span>Nguồn 2 <span className="hidden sm:inline">(DuckDuckGo)</span></span>
               </button>
             </div>
           </div>
         ) : (
-          /* Chế độ 2: Bóc video từ Link Web */
-          <form onSubmit={handleExtractFromLink} className="flex gap-2">
+          <form onSubmit={handleExtractFromLink} className="flex items-center gap-2 w-full">
             <div className="relative flex-1">
               <LinkIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
               <input
@@ -296,19 +285,19 @@ export default function VideoSearchGallery() {
                 required
                 value={linkInput}
                 onChange={(e) => setLinkInput(e.target.value)}
-                placeholder="Dán link website vào đây (VD: https://x.com/.../status/...)..."
+                placeholder="Dán link bài viết (VD: https://x.com/...)..."
                 style={{
                   color: '#0f172a',
                   backgroundColor: '#ffffff',
                   WebkitTextFillColor: '#0f172a',
                 }}
-                className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
+                className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-all shadow-sm"
               />
             </div>
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-xl transition-colors flex items-center gap-2 disabled:opacity-50 shrink-0"
+              className="px-4 sm:px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-xl transition flex items-center gap-1.5 shrink-0 disabled:opacity-50 cursor-pointer shadow-md shadow-emerald-600/20"
             >
               {loading ? <Loader2 size={16} className="animate-spin" /> : 'Bóc video'}
             </button>
@@ -318,14 +307,14 @@ export default function VideoSearchGallery() {
 
       {/* Thông tin số lượng */}
       {videos.length > 0 && (
-        <div className="w-full flex justify-between items-center text-xs text-slate-400 pb-3 border-b border-slate-800/80 mb-4">
-          <span>Tìm thấy: <strong className="text-white">{videos.length}</strong> video</span>
-          <span>{searchMode === 'keyword' ? `Nguồn: ${engine.toUpperCase()}` : 'Chế độ bóc tách link'}</span>
+        <div className="w-full flex justify-between items-center text-xs text-slate-400 pb-2.5 border-b border-slate-800/80 mb-4 px-1">
+          <span>Tìm thấy: <strong className="text-slate-200">{videos.length}</strong> video</span>
+          <span>{searchMode === 'keyword' ? `Nguồn: ${engine.toUpperCase()}` : 'Bóc tách từ link'}</span>
         </div>
       )}
 
       {/* Lưới danh sách Video */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 w-full">
         {videos.map((item, idx) => (
           <VideoCard
             key={`${item.videoUrl || item.streamUrl}-${idx}`}
@@ -337,12 +326,12 @@ export default function VideoSearchGallery() {
 
       {/* Tải thêm */}
       {searchMode === 'keyword' && videos.length > 0 && hasMore && (
-        <div className="text-center my-8">
+        <div className="text-center my-6">
           <button
             type="button"
             onClick={handleLoadMore}
             disabled={loadingMore}
-            className="px-6 py-2.5 bg-slate-900 hover:bg-slate-800 text-slate-300 font-medium text-xs rounded-xl border border-slate-800 transition-colors inline-flex items-center gap-1.5 disabled:opacity-50"
+            className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-slate-300 font-medium text-xs rounded-xl border border-slate-800 transition inline-flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
           >
             {loadingMore ? (
               <>
@@ -361,7 +350,7 @@ export default function VideoSearchGallery() {
 
       {/* Trạng thái trống */}
       {!loading && !hasSearched && (
-        <div className="py-24 text-center text-slate-400 text-sm">
+        <div className="py-16 text-center text-slate-500 text-xs sm:text-sm px-4">
           {searchMode === 'keyword'
             ? 'Nhập từ khóa phía trên để bắt đầu tìm video.'
             : 'Dán link bài viết chứa video phía trên để bóc tách luồng phát trực tiếp.'}
@@ -369,40 +358,40 @@ export default function VideoSearchGallery() {
       )}
 
       {!loading && hasSearched && videos.length === 0 && (
-        <div className="py-24 text-center text-slate-400 text-sm">
+        <div className="py-16 text-center text-slate-500 text-xs sm:text-sm">
           Không tìm thấy video nào từ nguồn yêu cầu.
         </div>
       )}
 
-      {/* MODAL PHÁT VIDEO ĐƯỢC BÓC TÁCH */}
+      {/* Modal Video Player: Khóa tràn viền và full view trên điện thoại */}
       {selectedVideo && (
         <div
-          className="fixed inset-0 z-[999999] flex items-center justify-center bg-black/85 backdrop-blur-md p-3 sm:p-6"
+          className="fixed inset-0 z-[999999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-2 sm:p-4"
           onClick={handleCloseModal}
         >
           <div
-            className="relative w-full max-w-4xl bg-slate-950 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]"
+            className="relative w-full max-w-3xl bg-slate-950 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header Modal */}
-            <div className="px-4 py-3 bg-slate-900 border-b border-slate-800 flex items-center justify-between text-white">
-              <div className="flex items-center gap-2 truncate pr-4">
-                <span className="text-[10px] px-2 py-0.5 rounded bg-blue-600/30 text-blue-400 font-semibold uppercase">
+            <div className="px-3 py-2.5 bg-slate-900 border-b border-slate-800 flex items-center justify-between text-white">
+              <div className="flex items-center gap-2 truncate pr-2">
+                <span className="text-[9px] px-1.5 py-0.5 rounded bg-blue-600/30 text-blue-400 font-semibold uppercase shrink-0">
                   {selectedVideo.publisher || 'Web Video'}
                 </span>
-                <h3 className="text-xs sm:text-sm font-medium truncate" title={selectedVideo.title}>
+                <h3 className="text-xs font-medium truncate" title={selectedVideo.title}>
                   {selectedVideo.title}
                 </h3>
               </div>
 
-              <div className="flex items-center gap-1.5 shrink-0">
+              <div className="flex items-center gap-1 shrink-0">
                 <button
                   type="button"
                   onClick={() => openPopupWindow(selectedVideo.streamUrl || selectedVideo.videoUrl)}
                   className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition"
                   title="Mở tab riêng"
                 >
-                  <ExternalLink size={16} />
+                  <ExternalLink size={15} />
                 </button>
                 <button
                   type="button"
@@ -410,17 +399,17 @@ export default function VideoSearchGallery() {
                   className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition"
                   title="Đóng (ESC)"
                 >
-                  <X size={18} />
+                  <X size={17} />
                 </button>
               </div>
             </div>
 
-            {/* Khung Chiếu Video: Có referrerPolicy="no-referrer" và hỗ trợ Proxy */}
+            {/* Khung Chiếu Video */}
             <div className="relative w-full aspect-video bg-black flex items-center justify-center">
               {extracting ? (
-                <div className="flex flex-col items-center gap-3 text-slate-300">
-                  <Loader2 size={36} className="animate-spin text-emerald-500" />
-                  <span className="text-xs font-medium tracking-wide">Đang trích xuất luồng video...</span>
+                <div className="flex flex-col items-center gap-2 text-slate-400">
+                  <Loader2 size={32} className="animate-spin text-blue-500" />
+                  <span className="text-xs font-medium">Đang trích xuất luồng video...</span>
                 </div>
               ) : directStreamUrl ? (
                 <video
@@ -435,39 +424,39 @@ export default function VideoSearchGallery() {
                   Trình duyệt không hỗ trợ phát file này.
                 </video>
               ) : (
-                <div className="flex flex-col items-center justify-center p-6 text-center max-w-md">
-                  <div className="w-14 h-14 rounded-full bg-blue-600/20 text-blue-500 flex items-center justify-center mb-3 border border-blue-500/30">
-                    <Play size={24} className="fill-current ml-1" />
+                <div className="flex flex-col items-center justify-center p-4 text-center max-w-sm">
+                  <div className="w-12 h-12 rounded-full bg-blue-600/20 text-blue-400 flex items-center justify-center mb-2 border border-blue-500/30">
+                    <Play size={20} className="fill-current ml-0.5" />
                   </div>
-                  <h4 className="text-white text-sm font-semibold mb-1 line-clamp-2">
+                  <h4 className="text-white text-xs sm:text-sm font-semibold mb-1 line-clamp-2">
                     {selectedVideo.title}
                   </h4>
-                  <p className="text-slate-400 text-xs mb-4">
-                    Trang nguồn này chặn nhúng hoặc bảo mật luồng video. Hãy mở trong cửa sổ rạp chiếu riêng để xem.
+                  <p className="text-slate-400 text-xs mb-3">
+                    Nguồn này bảo mật luồng video. Hãy mở trong tab riêng để xem.
                   </p>
                   <button
                     type="button"
                     onClick={() => openPopupWindow(selectedVideo.videoUrl)}
-                    className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold shadow-lg transition flex items-center gap-2"
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold shadow-md transition flex items-center gap-1.5"
                   >
-                    <Play size={14} className="fill-current" />
-                    Mở Rạp Chiếu Riêng
+                    <Play size={13} className="fill-current" />
+                    Mở tab xem video
                   </button>
                 </div>
               )}
             </div>
 
             {/* Footer Modal */}
-            <div className="px-4 py-2.5 bg-slate-900 border-t border-slate-800 flex justify-between items-center text-xs text-slate-400">
-              <span className="truncate max-w-[60%] font-mono text-[11px]">
+            <div className="px-3 py-2 bg-slate-900 border-t border-slate-800 flex justify-between items-center text-xs text-slate-400">
+              <span className="truncate max-w-[60%] font-mono text-[10px]">
                 {selectedVideo.publisher || 'Web'} • {selectedVideo.views || 'Video'}
               </span>
               <button
                 type="button"
                 onClick={() => openPopupWindow(selectedVideo.streamUrl || selectedVideo.videoUrl)}
-                className="text-blue-400 hover:underline flex items-center gap-1 text-xs"
+                className="text-blue-400 hover:underline flex items-center gap-1 text-[11px]"
               >
-                Mở trong rạp chiếu riêng ↗
+                Mở link ngoài ↗
               </button>
             </div>
           </div>
