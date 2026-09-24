@@ -21,7 +21,7 @@ export default function VideoCard({ item, onSelectVideo }) {
     }
 
     // 3. Chỉ đưa qua Backend Proxy đối với các đường link http/https ngoài
-    return `http://localhost:5000/api/proxy-image?url=${encodeURIComponent(target)}`;
+    return `https://omnisearch-backend-fxr7.onrender.com/api/proxy-image?url=${encodeURIComponent(target)}`;
   };
 
   // Khai báo biến thumbnailSrc bằng cách gọi hàm xử lý an toàn

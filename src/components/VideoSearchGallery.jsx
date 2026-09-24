@@ -43,7 +43,7 @@ export default function VideoSearchGallery() {
   const getSafeStreamUrl = (url = '') => {
     if (!url) return '';
     if (url.includes('twimg.com') || url.includes('twitter.com') || url.includes('x.com')) {
-      return `http://localhost:5000/api/proxy-video?url=${encodeURIComponent(url)}`;
+      return `https://omnisearch-backend-fxr7.onrender.com/api/proxy-video?url=${encodeURIComponent(url)}`;
     }
     return url;
   };
@@ -60,7 +60,7 @@ export default function VideoSearchGallery() {
 
     try {
       const res = await axios.get(
-        `http://localhost:5000/api/videos?q=${encodeURIComponent(query)}&page=1&engine=${engine}`
+        `https://omnisearch-backend-fxr7.onrender.com/api/videos?q=${encodeURIComponent(query)}&page=1&engine=${engine}`
       );
       const data = res.data.data || [];
       setVideos(data);
@@ -85,7 +85,7 @@ export default function VideoSearchGallery() {
 
     try {
       const res = await axios.get(
-        `http://localhost:5000/api/extract-from-web?url=${encodeURIComponent(linkInput.trim())}`
+        `https://omnisearch-backend-fxr7.onrender.com/api/extract-from-web?url=${encodeURIComponent(linkInput.trim())}`
       );
       const data = res.data.data || [];
       setVideos(data);
@@ -104,7 +104,7 @@ export default function VideoSearchGallery() {
       setLoading(true);
       setPage(1);
       axios
-        .get(`http://localhost:5000/api/videos?q=${encodeURIComponent(query)}&page=1&engine=${newEngine}`)
+        .get(`https://omnisearch-backend-fxr7.onrender.com/api/videos?q=${encodeURIComponent(query)}&page=1&engine=${newEngine}`)
         .then((res) => {
           setVideos(res.data.data || []);
           setHasMore(res.data.hasMore !== false && (res.data.data || []).length > 0);
@@ -121,7 +121,7 @@ export default function VideoSearchGallery() {
 
     try {
       const res = await axios.get(
-        `http://localhost:5000/api/videos?q=${encodeURIComponent(query)}&page=${nextPage}&engine=${engine}`
+        `https://omnisearch-backend-fxr7.onrender.com/api/videos?q=${encodeURIComponent(query)}&page=${nextPage}&engine=${engine}`
       );
       const newVideos = res.data.data || [];
 
@@ -167,7 +167,7 @@ export default function VideoSearchGallery() {
     setExtracting(true);
     try {
       const res = await axios.get(
-        `http://localhost:5000/api/extract-video?url=${encodeURIComponent(video.videoUrl)}`
+        `https://omnisearch-backend-fxr7.onrender.com/api/extract-video?url=${encodeURIComponent(video.videoUrl)}`
       );
       if (res.data?.success && res.data?.streamUrl) {
         setDirectStreamUrl(res.data.streamUrl);
